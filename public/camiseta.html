@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- Dentro del body HTML -->
+<h2>Diseña tu Camiseta</h2>
+<div class="camiseta-container">
+   <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 2 26 14" id="camiseta-svg">
+        <path  class="parte-camiseta"  id="manga-izquierda" d="M 4 8 M 5 3 L 5 6 L 3 7 L 1 5" fill="#000000" />
+        <path class="parte-camiseta"  id="torso" d="M 9 5 L 7 3 L 5 3 L 5 6 L 5 12 L 13 12 L 13 6 L 13 3 L 11 3" fill="#000000" />
+        <path class="parte-camiseta"  id="manga-derecha" d="M 13 6 L 13 3 L 17 5 L 15 7" fill="#000000" />
+        <path class="parte-camiseta"  id="cuelloizq" d="M 8 2 L 7 3 L 9 5 L 8 3" fill="#000000" />
+        <path class="parte-camiseta"  id="cuelloder" d="M 10 2 L 11 3 L 9 5 L 10 3 M 1 4" fill="#000000" />
+
+        <!--      -->
+
+    </svg>
+</div>
+<!-- Selector de color y botones -->
+<div>
+  <input type="color" id="color-picker" value="#ffffff" />
+  <button id="btn-guardar">Guardar Diseño</button>
+  <button id="btn-limpiar">Reiniciar Colores</button>
+</div>
+
+<script>
+    // Referencias a elementos del DOM
+const svg = document.getElementById('camiseta-svg');
+const colorPicker = document.getElementById('color-picker');
+const btnGuardar = document.getElementById('btn-guardar');
+const btnLimpiar = document.getElementById('btn-limpiar');
+
+let parteSeleccionada = null; // elemento SVG actualmente seleccionado por el usuario
+
+// Event listener para seleccionar parte de la camiseta al hacer click
+svg.addEventListener('click', (event) => {
+  if (event.target.classList.contains('parte-camiseta')) {
+    parteSeleccionada = event.target;  // establece la parte clickeada como seleccionada
+    // Opcional: resaltar de alguna forma la parte seleccionada, o mostrar su nombre
+    console.log('Parte seleccionada:', parteSeleccionada.id);
+    // Actualizar el colorPicker al color actual de la parte
+    const colorActual = parteSeleccionada.getAttribute('fill');
+    colorPicker.value = colorActual;
+  }
+});
+
+// Event listener para cambiar color de la parte seleccionada
+colorPicker.addEventListener('input', (event) => {
+  if (parteSeleccionada) {
+    parteSeleccionada.setAttribute('fill', event.target.value);
+  }
+});
+
+// Botón para reiniciar todos los colores a blanco
+btnLimpiar.addEventListener('click', () => {
+  document.querySelectorAll('.parte-camiseta').forEach(el => {
+    el.setAttribute('fill', '#ffffff');
+  });
+});
+btnGuardar.addEventListener('click', async () => {
+  // Obtener colores actuales de cada parte
+  const diseño = {
+    torsoColor: document.getElementById('torso').getAttribute('fill'),
+    mangaIzqColor: document.getElementById('manga-izquierda').getAttribute('fill'),
+    mangaDerColor: document.getElementById('manga-derecha').getAttribute('fill'),
+    cuelloDerColor: document.getElementById('cuelloder').getAttribute('fill'),
+    cuelloIzqColor: document.getElementById('cuelloizq').getAttribute('fill')
+  };
+  // Enviar via fetch al servidor
+  const resp = await fetch('/api/camisetas', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('token')  // incluir token si es ruta protegida
+    },
+    body: JSON.stringify(diseño)
+  });
+  const data = await resp.json();
+  console.log('Diseño guardado en servidor:', data);
+});
+
+</script>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f9f0ff; /* fondo suave lila */
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        color: #4b0082;
+    }
+
+    h2 {
+        margin-top: 40px;
+        font-size: 2em;
+        color: #8000c8;
+    }
+
+    .camiseta-container {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(128, 0, 200, 0.2);
+        margin-top: 20px;
+        margin-bottom: 20px;
+        width: 300px;
+        display: flex;
+        justify-content: center;
+    }
+
+    svg {
+        width: 200px;
+        height: auto;
+    }
+
+    input[type="color"] {
+        width: 60px;
+        height: 40px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 15px;
+        background-color: transparent;
+    }
+
+    button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 12px;
+        background-color: #c084fc;
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+        margin: 10px 5px;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: #a855f7;
+    }
+
+    div {
+        text-align: center;
+    }
+</style>
+
+</body>
+</html>

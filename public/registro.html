@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro de nuevos usuarios</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #9874eb, #acb6e5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .registro-container {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: center;
+        }
+
+        .registro-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .registro-container input[type="text"],
+        .registro-container input[type="email"],
+        .registro-container input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .registro-container input[type="text"]:focus,
+        .registro-container input[type="email"]:focus,
+        .registro-container input[type="password"]:focus {
+            border-color: #7c6ee6;
+            outline: none;
+        }
+
+        .registro-container input[type="button"] {
+            background-color: #7c6ee6;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .registro-container input[type="button"]:hover {
+            background-color: #5a4db8;
+        }
+    </style>
+</head>
+<body>
+    <div class="registro-container">
+        <h2>Crear cuenta</h2>
+        <input type="text" id="txt_nombre" placeholder="Escriba el nombre">
+        <input type="email" id="txt_email" placeholder="Escriba el email">
+        <input type="password" id="txt_clave" placeholder="Escriba la clave">
+        <input type="button" value="Registrarse" onclick="registro()">
+    </div>
+
+    <script type="text/javascript">
+        function registro() {
+            let nombreinput = document.getElementById("txt_nombre").value;
+            let emailinput = document.getElementById("txt_email").value;
+            let passinput = document.getElementById("txt_clave").value;
+
+            fetch('/api/usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: nombreinput, email: emailinput, clave: passinput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Usuario creado:', data);
+                alert("Usuario creado con éxito");
+            })
+            .catch(error => {
+                console.error('Error al crear el usuario:', error);
+                alert("Error al crear el usuario");
+            });
+        }
+    </script>
+</body>
+</html>
