@@ -1,9 +1,28 @@
 const Camiseta = require('../models/camiseta');
+const Usuario = require('../models/Usuario');
 
 exports.getCamisetas = async (req, res) => {
   try {
     const camisetas = await Camiseta.find();
-    res.json(camisetas);
+    const camisetasConUsuario = await Promise.all(
+      camisetas.map(async (c) => {
+        try {
+          console.log(creador)
+          const usuario = await Usuario.findById(c.creador).select('_id nombre correo');
+          return {
+            ...c.toObject(),        // Convertir el documento de Mongoose a objeto plano JS
+            creador: usuario || null // Reemplazar el campo 'creador' con los datos del usuario (o null si no se encontró)
+          };
+        } catch (error) {
+          console.log(error)
+          return {
+            ...c.toObject(),
+            creador: null
+          };
+        }
+      })
+    );    
+    res.json(camisetasConUsuario);
   } catch (error) {
     res.status(500).json({ error: 'Error del servidor' });
   }
@@ -22,6 +41,7 @@ exports.getCamisetaById = async (req, res) => {
 exports.createCamiseta = async (req, res) => {
   try {
     const nuevaCamiseta = new Camiseta(req.body);
+    nuevaCamiseta.creador = req.usuarioId
     camisetaGuardada=await nuevaCamiseta.save();
     res.status(201).json(CamisetaGuardada);
   } catch (error) {
@@ -53,3 +73,4 @@ exports.deleteCamiseta = async (req, res) => {
     res.status(500).json({ error: 'Error del servidor' });
   }
 };
+
