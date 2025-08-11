@@ -223,7 +223,7 @@
       const camisetas = await resp.json();
       const tabla = $('#tabla-camisetas').DataTable();
       tabla.clear();
-
+console.log(camisetas)
       camisetas.forEach(c => {
         let creador = 'Desconocido';
         if (c.creador && typeof c.creador === 'object') {

@@ -20,7 +20,7 @@ const jwt = require('jsonwebtoken');
     
     // 3. Credenciales válidas: Generar token JWT
     const datosToken = { id: usuario._id };            // Podemos incluir datos en el token (p.ej. el ID de usuario)
-    const secreto = 'SECRETO_SUPER_SEGUR0';            // Clave secreta para firmar el token (en producción, mantener en una variable de entorno)
+    const secreto = process.env.JWT_SECRET;            // Clave secreta para firmar el token (en producción, mantener en una variable de entorno)
     const opciones = { expiresIn: '1h' };              // El token expirará en 1 hora
     const token = jwt.sign(datosToken, secreto, opciones);
     

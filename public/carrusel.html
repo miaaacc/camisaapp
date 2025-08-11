@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrusel de Camisetas</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f6fa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #5a2d82;
+      margin-bottom: 20px;
+    }
+
+    .carousel {
+      display: flex;
+      flex-wrap: wrap; /* Para que se vean todas y salten de línea */
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .card {
+      background: linear-gradient(145deg, #e6d5f5, #f4ebfb);
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 4px 10px rgba(123, 84, 158, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      width: 200px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 15px rgba(123, 84, 158, 0.3);
+    }
+
+    .miniatura {
+      display: block;
+      margin: 0 auto 10px;
+      width: 100%;
+      height: auto;
+    }
+
+    .nombre-creador {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #5a2d82;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+
+    .calificacion {
+      font-size: 0.95rem;
+      color: #7b549e;
+      text-align: center;
+    }
+
+    .fecha {
+      font-size: 0.85rem;
+      color: #a084b6;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .botones-reaccion {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-like, .btn-dislike {
+      flex: 1;
+      padding: 0.4rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-like {
+      background-color: #b57edc;
+      color: white;
+    }
+
+    .btn-like:hover {
+      background-color: #a46bcf;
+    }
+
+    .btn-dislike {
+      background-color: #d9a2e6;
+      color: white;
+    }
+
+    .btn-dislike:hover {
+      background-color: #c089d1;
+    }
+  </style>
+</head>
+<body>
+    <h1>Explora Camisetas</h1>
+  <div class="carousel" id="carousel">
+    <!-- Las tarjetas se insertarán aquí dinámicamente con JS -->
+  </div>
+
+  <!-- Enlace al archivo JavaScript -->
+   <script>
+    // Cargar camisetas desde el backend y renderizar en el carrusel
+    // Función para formatear fecha (ejemplo simple)
+function formatearFecha(isoDate) {
+  const opciones = { year: 'numeric', month: 'numeric', day: 'numeric' };
+  return new Date(isoDate).toLocaleDateString('es-ES', opciones);
+}
+
+function generarMiniatura(c) {
+return `
+<svg class="miniatura" viewBox="1 2 26 14">
+<path d="M 4 8 M 5 3 L 5 6 L 3 7 L 1 5" fill="${c.mangaIzqColor}" />
+<path d="M 9 5 L 7 3 L 5 3 L 5 6 L 5 12 L 13 12 L 13 6 L 13 3 L 11 3" fill="${c.torsoColor}" />
+<path d="M 13 6 L 13 3 L 17 5 L 15 7" fill="${c.mangaDerColor}" />
+<path d="M 8 2 L 7 3 L 9 5 L 8 3" fill="${c.cuelloIzqColor}" />
+<path d="M 10 2 L 11 3 L 9 5 L 10 3 M 1 4" fill="${c.cuelloDerColor}" />
+</svg>`;
+}
+
+async function loadCamisetas() {
+try {
+const resp = await fetch('/api/camisetas', {
+headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+});
+const camisetas = await resp.json();
+
+const contenedor = document.getElementById('carousel');
+contenedor.innerHTML = ''; // Limpiar carrusel
+
+camisetas.forEach(c => {
+let nombre = 'Desconocido';
+if (c.creador && typeof c.creador === 'object') {
+nombre = c.creador.nombre || c.creador.correo || 'Usuario';
+} else if (typeof c.creador === 'string') {
+nombre = c.creador;
+}
+
+const calificacion = typeof c.calificacion === 'number' ? c.calificacion.toFixed(1) : '0.0';
+
+const card = document.createElement('div');
+card.classList.add('card');
+card.innerHTML = `
+${generarMiniatura(c)}
+<div class="nombre-creador">${nombre}</div>
+<div class="calificacion">Calificación: ⭐ ${calificacion}</div>
+<div class="fecha">${new Date(c.fechaCreacion).toLocaleDateString()}</div>
+<div class="botones-reaccion">
+<button class="btn-like" onclick="reaccion('${c._id}', 1)">Me gusta</button>
+<button class="btn-dislike" onclick="reaccion('${c._id}', -1)">No me gusta</button>
+</div>
+`;
+contenedor.appendChild(card);
+});
+
+} catch (error) {
+console.error('Error al cargar camisetas:', error);
+}
+}
+
+// Función para enviar voto de calificación
+async function reaccion(id, valor) {
+  try {
+    const resp = await fetch(`/api/camisetas/vota/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer <TU_TOKEN_AQUI>'
+      },
+      body: JSON.stringify({ calificacion: valor })
+    });
+    if (!resp.ok) {
+      throw new Error('Error al enviar voto');
+    }
+    // Se asume que el servidor devuelve la camiseta actualizada o un status 200
+    console.log(`Voto enviado para camiseta ${id}: ${valor}`);
+    // Volver a cargar las camisetas para actualizar la UI con la nueva calificación
+    await loadCamisetas();
+  } catch (error) {
+    console.error('Error votando camiseta:', error);
+  }
+}
+loadCamisetas();
+   </script>
+</body>
+</html>

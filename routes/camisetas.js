@@ -7,6 +7,7 @@ router.get('/', camisetaController.getCamisetas);
 router.get('/:id',verificarToken, camisetaController.getCamisetaById);
 router.post('/',verificarToken, camisetaController.createCamiseta);
 router.put('/:id',verificarToken, camisetaController.updateCamiseta);
+router.put('/vota/:id', camisetaController.calificarcamiseta);
 router.delete('/:id',verificarToken, camisetaController.deleteCamiseta);
 
 module.exports = router;
