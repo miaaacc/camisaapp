@@ -121,7 +121,7 @@
         // Redireccionar o continuar lógica
         // window.location.href = 'dashboard.html'; // si aplica
       const token = localStorage.getItem('token');
-      location.href = `/camiseta?token=${encodeURIComponent(token)}`;
+      location.href = `/index?token=${encodeURIComponent(token)}`;
       } catch (error) {
         console.error('Error al iniciar sesión:', error);
         document.getElementById('mensaje').innerText = 'Ocurrió un error en el servidor.';

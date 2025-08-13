@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menú</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f5fc;
+      text-align: center;
+      padding-top: 80px;
+    }
+
+    .menu-container {
+      background-color: #a76ccf;
+      padding: 30px;
+      border-radius: 15px;
+      display: inline-block;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    input[type="button"] {
+      background-color: #cda4f5;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      margin: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    input[type="button"]:hover {
+      background-color: #b880e8;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+    <input type="button" value="Ir a Carrusel" onclick="iracarrusel()">
+    <input type="button" value="Ir a Gestión de camisas" onclick="iragestiondecamisas()">
+    <input type="button" value="Ir a resultados" onclick="iraresultados()">
+
+    <script>
+        function iracarrusel()
+        {
+            location.href = "/carrusel?token="+ localStorage.getItem("token");
+        }
+         function iragestiondecamisas()
+        {
+            location.href = "/camiseta?token="+ localStorage.getItem("token");
+        }
+         function iraresultados()
+        {
+            location.href = "/resultado?token="+ localStorage.getItem("token");
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Diseño de Camisetas</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <!-- Carga de estilos de DataTables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f5fc;
+      margin: 0;
+      padding: 20px;
+      color: #4a3b5c;
+    }
+
+    h3 {
+      text-align: center;
+      color: #6d4c9b;
+      margin-bottom: 20px;
+    }
+
+    hr {
+      border: none;
+      border-top: 2px solid #d8b7f5;
+      margin-bottom: 30px;
+    }
+
+    /* Estilo para las miniaturas SVG */
+    svg.miniatura {
+      width: 60px;
+      height: 40px;
+    }
+
+    /* Tabla */
+    table.dataTable {
+      background-color: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    table.dataTable thead {
+      background-color: #cda4f5;
+      color: white;
+    }
+
+    table.dataTable thead th {
+      padding: 10px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    table.dataTable tbody td {
+      text-align: center;
+      padding: 10px;
+    }
+
+    /* Hover sobre filas */
+    table.dataTable tbody tr:hover {
+      background-color: #f4e9ff;
+    }
+
+    /* Botón oculto */
+    #btn-modificar-real {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+
+<hr>
+
+<!-- Tabla de camisetas existentes -->
+<h3>Mis Camisetas</h3>
+<table id="tabla-camisetas" class="display" style="width:100%">
+  <thead>
+  <tr>
+    <th>Vista previa</th>
+    <th>Fecha</th>
+    <th>Creador</th> <!-- NUEVA COLUMNA -->
+<th>Calificacion</th> 
+  </tr>
+</thead>
+  <tbody></tbody>
+</table>
+
+<!-- Carga de librerías necesarias -->
+<!-- Incluimos jQuery y DataTables JS/CSS en la página (por ejemplo via CDN) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+
+<script>
+// Genera un SVG miniatura como string para mostrar en la tabla
+function generarMiniatura(c) {
+  return `
+    <svg class="miniatura" viewBox="1 2 26 14">
+      <path d="M 4 8 M 5 3 L 5 6 L 3 7 L 1 5" fill="${c.mangaIzqColor}" />
+      <path d="M 9 5 L 7 3 L 5 3 L 5 6 L 5 12 L 13 12 L 13 6 L 13 3 L 11 3" fill="${c.torsoColor}" />
+      <path d="M 13 6 L 13 3 L 17 5 L 15 7" fill="${c.mangaDerColor}" />
+      <path d="M 8 2 L 7 3 L 9 5 L 8 3" fill="${c.cuelloIzqColor}" />
+      <path d="M 10 2 L 11 3 L 9 5 L 10 3 M 1 4" fill="${c.cuelloDerColor}" />
+    </svg>`;
+}
+
+// Carga todas las camisetas desde el backend y llena la tabla
+async function cargarTabla() {
+  const resp = await fetch('/api/camisetas/ordenadoxcalificacion', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  });
+  const camisetas = await resp.json();
+  console.log(camisetas)
+  const tabla = $('#tabla-camisetas').DataTable();
+  tabla.clear(); // Limpia la tabla antes de llenarla
+
+  camisetas.forEach(c => {
+    // Extrae el nombre del creador si existe
+    let creador = 'Desconocido';
+    if (c.creador && typeof c.creador === 'object') {
+      creador = creador._id || c.creador.nombre || c.creador.correo || 'Usuario';
+    } else if (typeof c.creador === 'string') {
+      creador = c.creador;
+    }
+
+    tabla.row.add([
+      generarMiniatura(c),
+      new Date(c.fechaCreacion).toLocaleString(),
+      creador,
+      c.calificacion
+    ]);
+  });
+
+  tabla.draw();
+}
+// Inicializa la tabla al cargar la página
+$(document).ready(() => {
+  $('#tabla-camisetas').DataTable({ responsive: true });
+  cargarTabla(); // Llamada inicial
+});
+</script>
+</body>
+</html>
